@@ -34,7 +34,7 @@ module.exports = {
           model: 'Users',
           key: 'id',
         },
-        onDelete: 'CASCADE', // If a user is deleted, their tasks will be deleted
+        onDelete: 'CASCADE',
       },
       createdAt: {
         type: Sequelize.DATE,

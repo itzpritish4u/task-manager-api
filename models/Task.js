@@ -44,7 +44,6 @@ const Task = sequelize.define('Task', {
   },
 });
 
-// Define association with User
 Task.belongsTo(User, { foreignKey: 'userId', onDelete: 'CASCADE' });
 User.hasMany(Task, { foreignKey: 'userId' });
 

@@ -1,6 +1,5 @@
 import Task from '../models/Task.js';
 
-// Create a new task
 export const createTask = async (req, res) => {
   const { title, description, priority, dueDate, status } = req.body;
 
@@ -11,7 +10,7 @@ export const createTask = async (req, res) => {
       priority,
       dueDate,
       status,
-      userId: req.user.userId,  // req.user is set by authMiddleware
+      userId: req.user.userId,
     });
     res.status(201).json({ message: 'Task created', task: newTask });
   } catch (error) {
@@ -19,7 +18,6 @@ export const createTask = async (req, res) => {
   }
 };
 
-// Retrieve all tasks for the logged-in user with optional filters
 export const getTasks = async (req, res) => {
   const { priority, status, dueDate, sortBy, order } = req.query;
   const whereClause = { userId: req.user.userId };
@@ -39,7 +37,6 @@ export const getTasks = async (req, res) => {
   }
 };
 
-// Update a task
 export const updateTask = async (req, res) => {
   const { id } = req.params;
   const { title, description, priority, dueDate, status } = req.body;
@@ -63,7 +60,6 @@ export const updateTask = async (req, res) => {
   }
 };
 
-// Delete a task
 export const deleteTask = async (req, res) => {
   const { id } = req.params;
 
