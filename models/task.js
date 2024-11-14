@@ -2,10 +2,7 @@
 const { Model, DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
-  class Task extends Model {
-    static associate(models) {
-    }
-  }
+  class Task extends Model {}
   Task.init(
     {
       id: { 

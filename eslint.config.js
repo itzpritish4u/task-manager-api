@@ -1,23 +1,25 @@
+// @ts-nocheck
 const globals = require('globals');
+const airbnbBase = require('eslint-config-airbnb-base');
+const pluginImport = require('eslint-plugin-import');
 const pluginJs = require('@eslint/js');
 
 /** @type {import('eslint').Linter.Config[]} */
 module.exports = [
   {
     languageOptions: {
-      globals: {
-        ...globals.node,
-        es2021: true,
-      },
-      parserOptions: {
-        ecmaVersion: 2021,
-        sourceType: 'script',
-      },
+      ecmaVersion: 2021,
+      sourceType: 'module',
+      globals: globals.node,
+    },
+    plugins: {
+      import: pluginImport,
     },
     rules: {
-      'no-console': 'warn',
-      'semi': ['error', 'always'],
+      ...airbnbBase.rules,
       'quotes': ['error', 'single'],
+      'semi': ['error', 'always'],
+      'no-console': 'warn',
     },
   },
   pluginJs.configs.recommended,

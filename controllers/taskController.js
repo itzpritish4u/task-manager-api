@@ -1,5 +1,6 @@
 const { Task } = require('../models');
 const { Op } = require('sequelize');
+const logger = require('../config/logger');
 
 exports.getTasks = async (req, res) => {
   try {
@@ -47,8 +48,10 @@ exports.createTask = async (req, res) => {
       userId: req.user.id,
     });
 
+    logger.info(`Task created: ${task.title} by user ID: ${req.user.id}`);
     res.status(201).json(task);
   } catch (err) {
+    logger.error(`Task creation error: ${err.message}`);
     res.status(500).json({ error: err.message });
   }
 };
@@ -60,7 +63,10 @@ exports.updateTask = async (req, res) => {
     const { title, description, priority, dueDate, status } = req.body;
 
     const task = await Task.findOne({ where: { id, userId: req.user.id } });
-    if (!task) return res.status(404).json({ error: 'Task not found' });
+    if (!task){
+      logger.warn(`Task not found: ID ${id} for user ID: ${req.user.id}`);
+      return res.status(404).json({ error: 'Task not found' });
+    }
 
     task.title = title || task.title;
     task.description = description || task.description;
@@ -69,24 +75,30 @@ exports.updateTask = async (req, res) => {
     task.status = status || task.status;
 
     await task.save();
+    logger.info(`Task updated: ${task.title} by user ID: ${req.user.id}`);
 
     res.status(200).json(task);
   } catch (err) {
+    logger.error(`Task update error: ${err.message}`);
     res.status(500).json({ error: err.message });
   }
 };
-
 
 exports.deleteTask = async (req, res) => {
   try {
     const { id } = req.params;
 
     const task = await Task.findOne({ where: { id, userId: req.user.id } });
-    if (!task) return res.status(404).json({ error: 'Task not found' });
+    if (!task){
+      logger.warn(`Task not found for deletion: ID ${id} for user ID: ${req.user.id}`);
+      return res.status(404).json({ error: 'Task not found' });
+    }
 
     await task.destroy();
+    logger.info(`Task deleted: ${task.title} by user ID: ${req.user.id}`);
     res.status(204).json({ message: 'Task deleted successfully' });
   } catch (err) {
+    logger.error(`Task deletion error: ${err.message}`);
     res.status(500).json({ error: err.message });
   }
 };

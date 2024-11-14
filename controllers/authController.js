@@ -1,10 +1,11 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
-const config=require('../config/config');
+const config = require('../config/config');
+const logger = require('../config/logger');
 
 exports.register = async (req, res) => {
-  const salt=10;
+  const salt = 10;
   try {
     const { username, email, password } = req.body;
     if (!password) {
@@ -12,9 +13,15 @@ exports.register = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, salt);
-    const user = await User.create({ username, email, password: hashedPassword });
+    const user = await User.create({
+      username,
+      email,
+      password: hashedPassword,
+    });
+    logger.info(`User  registered: ${username}`);
     res.status(201).json({ message: 'User registered successfully', user });
   } catch (err) {
+    logger.error(`Registration error: ${err.message}`);
     res.status(400).json({ error: err.message });
   }
 };
