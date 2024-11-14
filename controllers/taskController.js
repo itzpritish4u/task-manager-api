@@ -1,51 +1,66 @@
-import Task from '../models/Task.js';
+const { Task } = require('../models');
+const { Op } = require('sequelize');
 
-export const createTask = async (req, res) => {
-  const { title, description, priority, dueDate, status } = req.body;
-
+exports.getTasks = async (req, res) => {
   try {
-    const newTask = await Task.create({
+    const { priority, status, startDate, endDate, sortBy, order } = req.query;
+
+    const where = { userId: req.user.id };
+    if (priority) where.priority = priority;
+    if (status) where.status = status;
+    if (startDate && endDate) where.dueDate = { [Op.between]: [startDate, endDate] };
+
+    const orderBy = [];
+    if (sortBy) {
+      orderBy.push([sortBy, order === 'desc' ? 'DESC' : 'ASC']);
+    }
+
+    const tasks = await Task.findAll({ where, order: orderBy });
+    res.status(200).json(tasks);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getTaskById = async (req, res) => {
+  try {
+    const task = await Task.findOne({ where: { id: req.params.id, userId: req.user.id } });
+    if (!task) return res.status(404).json({ error: 'Task not found' });
+
+    res.status(200).json(task);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+exports.createTask = async (req, res) => {
+  try {
+    const { title, description, priority, dueDate, status } = req.body;
+
+    const task = await Task.create({
       title,
       description,
       priority,
       dueDate,
       status,
-      userId: req.user.userId,
+      userId: req.user.id,
     });
-    res.status(201).json({ message: 'Task created', task: newTask });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
+
+    res.status(201).json(task);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
-export const getTasks = async (req, res) => {
-  const { priority, status, dueDate, sortBy, order } = req.query;
-  const whereClause = { userId: req.user.userId };
 
-  if (priority) whereClause.priority = priority;
-  if (status) whereClause.status = status;
-  if (dueDate) whereClause.dueDate = dueDate;
-
+exports.updateTask = async (req, res) => {
   try {
-    const tasks = await Task.findAll({
-      where: whereClause,
-      order: [[sortBy || 'dueDate', order || 'ASC']],
-    });
-    res.json(tasks);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
-  }
-};
+    const { id } = req.params;
+    const { title, description, priority, dueDate, status } = req.body;
 
-export const updateTask = async (req, res) => {
-  const { id } = req.params;
-  const { title, description, priority, dueDate, status } = req.body;
-
-  try {
-    const task = await Task.findOne({ where: { id, userId: req.user.userId } });
-    if (!task) {
-      return res.status(404).json({ message: 'Task not found' });
-    }
+    const task = await Task.findOne({ where: { id, userId: req.user.id } });
+    if (!task) return res.status(404).json({ error: 'Task not found' });
 
     task.title = title || task.title;
     task.description = description || task.description;
@@ -54,24 +69,24 @@ export const updateTask = async (req, res) => {
     task.status = status || task.status;
 
     await task.save();
-    res.json({ message: 'Task updated', task });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
+
+    res.status(200).json(task);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
-export const deleteTask = async (req, res) => {
-  const { id } = req.params;
 
+exports.deleteTask = async (req, res) => {
   try {
-    const task = await Task.findOne({ where: { id, userId: req.user.userId } });
-    if (!task) {
-      return res.status(404).json({ message: 'Task not found' });
-    }
+    const { id } = req.params;
+
+    const task = await Task.findOne({ where: { id, userId: req.user.id } });
+    if (!task) return res.status(404).json({ error: 'Task not found' });
 
     await task.destroy();
-    res.json({ message: 'Task deleted' });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
+    res.status(204).json({ message: 'Task deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };

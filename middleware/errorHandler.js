@@ -1,11 +1,7 @@
-export default function errorHandler(err, req, res, next) {
-  console.error(err.stack);
+const errorMiddleware = (err, req, res) => {
+  res
+    .status(err.status || 500)
+    .json({ error: err.message || 'Internal Server Error' });
+};
 
-  const statusCode = err.status || 500;
-  const message = err.message || 'An unexpected error occurred';
-
-  res.status(statusCode).json({
-    success: false,
-    message,
-  });
-}
+export default errorMiddleware;
