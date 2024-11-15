@@ -1,33 +1,31 @@
-'use strict';
-/** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('Tasks', {
       id: {
-        allowNull: false,
-        autoIncrement: true,
+        type: Sequelize.INTEGER,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        autoIncrement: true,
+        allowNull: false,
       },
       title: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
       },
       description: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
       },
       priority: {
-        type:Sequelize.ENUM('low', 'medium', 'high'),
-        allowNull:false
-
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       dueDate: {
         type: Sequelize.DATE,
-        allowNull:false
+        allowNull: false,
       },
       status: {
-        type: Sequelize.ENUM('pending', 'completed'),
-        allowNull:false
+        type: Sequelize.STRING,
+        allowNull: false,
+        defaultValue: 'pending',
       },
       userId: {
         type: Sequelize.INTEGER,
@@ -36,26 +34,21 @@ module.exports = {
           model: 'Users',
           key: 'id',
         },
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE',
       },
       createdAt: {
-        allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: Sequelize.fn('NOW'),
+        allowNull: false,
+        defaultValue: Sequelize.NOW,
       },
       updatedAt: {
+        type: Sequelize.DATE,
         allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.fn('NOW'),
+        defaultValue: Sequelize.NOW,
       },
-      deletedAt:{
-        type: Sequelize.DATE,
-        allowNull: true
-      }
     });
   },
+
   async down(queryInterface) {
     await queryInterface.dropTable('Tasks');
-  }
+  },
 };
